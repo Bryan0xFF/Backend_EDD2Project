@@ -6,16 +6,21 @@ const jwt = require('jsonwebtoken');
 
 
 const User = require('../models/user');
-
+const checkAuth = require('../routes/checkAuth');
 router.post('/signup', (req, res) => {
 
     User.find({username: req.body.username})
     .exec()
     .then(user => {
         if(user.length >= 1){
+                        
+            console.log(message);
             return res.status(409).json({
                 message: 'mail exist'
+
             });
+
+
         }else{
             bcrypt.hash(req.body.password, 10, (err, hash) => {
                 if (err) {
@@ -23,11 +28,14 @@ router.post('/signup', (req, res) => {
                     res.status(500).json({
                         error: err
                     });
+
+                    console.log(error);
                     
                 }else{
             
                     const user = new User({
-                        _id: new mongoose.Types.ObjectId(),
+                        _id: new mongoose.Types.ObjectId,
+                        nombre: req.body.nombre,
                         email: req.body.email,
                         username: req.body.username,
                         password: hash
@@ -89,7 +97,6 @@ router.post('/login', (req, res) => {
                     expiresIn: "1h"
                 });
                 return res.status(200).json({
-                    message: 'Autenticaci\'on satisfactoria',
                     token: token
                 });
             }
@@ -106,6 +113,39 @@ router.post('/login', (req, res) => {
         });
     });
 });
+
+router.get('/obtain', checkAuth, (req, res) => {
+
+    User.find()
+    .exec()
+    .then(users => {
+        res.status(200).json(users);
+    })
+    .catch(err => {
+        res.status(500).json({
+            error: err
+        });
+    });
+
+});
+
+router.post('/single', (req, res) => {
+
+    User.findOne({email: req.body.email})
+    .select('nombre email username password')
+    .exec()
+    .then(user =>{
+        res.status(200).json(user)
+    })
+    .catch(err => {
+        console.log(err);
+            error: err
+        
+    });
+
+});
+
+
 
 
 module.exports = router;

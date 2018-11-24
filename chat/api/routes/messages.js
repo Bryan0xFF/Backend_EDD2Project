@@ -15,16 +15,19 @@ mensaje
 para escuchar mensajes, se debe ir a /receive
 
 */
-router.post('/send', checkAuth, (req, res, next) => {
+
+//recordar ponerle el checkAuth
+router.post('/send', (req, res, next) => {
 
     const message = new Message({
 
         usuario_emisor: req.body.usuario_emisor,
         usuario_receptor: req.body.usuario_receptor,
-        mensaje: req.body.mensaje
-
+        mensaje: req.body.mensaje,
+        esArchivo: req.body.esArchivo,
+        nombreArchivo: req.body.nombreArchivo
     });
-
+    console.log(message);
     message
     .save()
     .then(result => {
@@ -35,6 +38,7 @@ router.post('/send', checkAuth, (req, res, next) => {
     })
     .catch(err => {
         error: err
+        console.log(err);
     });
 
 });
@@ -49,40 +53,42 @@ y retorna un array con todas las coincidencias de mensaje
 router.get('/receive', checkAuth, (req, res) => {
 
     Message.find()
-    .select('usuario_emisor usuario_receptor mensaje')
+    .select('usuario_emisor usuario_receptor mensaje esArchivo nombreArchivo -_id')
     .exec()
     .then(messages => {
 
-        const userMessages = {
-            
-            messagesArray: messages.map(message => {
+        res.status(200).json(messages);
 
-                if (req.body.usuario_emisor === message.usuario_emisor || req.body.usuario_emisor === message.usuario_receptor) {
-
-                    return{
-                        usuario_emisor: message.usuario_emisor,
-                        usuario_receptor: message.usuario_receptor,
-                        mensaje: message.mensaje
-                    }  
-                }
-            })
-        
-        };
-
+        /*        
         res.status(200).json({
-                userMessages
-        });
+            
+        count: messages.length,
+        messageArray: messages.map(message => {
 
+            return {
+                usuario_emisor: message.usuario_emisor,
+                usuario_receptor: message.usuario_receptor,
+                mensaje: message.mensaje,
+                esArchivo: message.esArchivo,
+                nombreArchivo: message.nombreArchivo
+            }
+
+        })
+     });
+     */
+        console.log(messages);
+        
     })
     .catch(err => {
         error: err
+        console.log(err);
     });
 });
 
 /*
  no tomar en cuenta, es solo para pruebas
 */ 
-router.get('/', checkAuth, (req, res) => {
+router.get('/', (req, res) => {
 
     Message.find()
     .exec()

@@ -8,11 +8,13 @@ mongoose.connect("mongodb+srv://Bryan0xFF:abcde54321@cluster0-oexhj.mongodb.net/
 const userRoutes = require('./api/routes/users');
 const messageRoutes = require('./api/routes/messages');
 
-app.use('/uploads', express.static('uploads'));
-app.use(bodyParser.urlencoded({extended: false}));
+limit = 52428800;
+app.use(express.json({limit: '50mb'}));
+app.use(express.urlencoded({limit: '50mb', extended: true}));
+
+
 app.use(bodyParser.json());
 mongoose.set('useCreateIndex', true);
-
 
 app.use((req, res, next) => {
     res.header('Access-Control-Allow-Origin', '*');
